@@ -1,0 +1,18 @@
+version: '3.3'
+services:
+  ang:
+    build:
+      context: .
+      dockerfile: dockerfile
+    # image: node:10.15
+    # container_name: dev
+    # volumes:
+    #   - ./client:/opt/react
+    working_dir: /opt
+    ports:
+      - '3000:3000'
+      - '9005:9005'
+    # depends_on:
+    #   - mysql
+    # command: sh -c "cd /opt/react && npm start"
+    tty: true
