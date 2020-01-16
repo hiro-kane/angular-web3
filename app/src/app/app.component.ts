@@ -7,22 +7,19 @@ import { Web3Service } from './web3.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  isUnlockWallet: boolean;
-  currentAccount: string;
+  isUnlockWallet: boolean = false;
+  currentAccount: string = 'no account';
 
   constructor(private web3Service: Web3Service) { }
 
   ngOnInit() {
-    this.web3Service.isUnlockWallet().subscribe(isUnlock => {
-      console.log("isUnlockWallet subscribe", isUnlock)
-      this.isUnlockWallet = isUnlock;
-    });
+    this.web3Service.web3.subscribe(web3 => {
+      this.isUnlockWallet = this.web3Service.isUnlockWallet()
+    })
 
-    // this.web3Service.getCurrentAccount().subscribe(account => {
-    //   console.log("subscribe account")
-    //   console.log(account)
-    //   this.currentAccount = account;
-    // });
+    this.web3Service.account.subscribe(account => {
+      this.currentAccount = account;
+    })
   }
 
   async unlock() {
