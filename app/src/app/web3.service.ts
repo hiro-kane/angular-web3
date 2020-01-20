@@ -36,18 +36,20 @@ export class Web3Service {
    * WalletUnlock
    */
   async　unlockWallet() {
-    const web3 = new Web3(window['ethereum']);
+    if (this.isUnlockWallet)
+      return;
+
+    console.log("unlock");
     try {
       // ログイン
       await window['ethereum'].enable();
+      // 取得できている場合はアカウント情報取得&監視処理を実行
+      this.monitorChangeAccountByLoginAfter();
+
     } catch (error) {
+
       return;
     }
-    // ログインに成功した場合
-    const accounts = await web3.eth.getAccounts();
-
-    // 取得できている場合はアカウント情報取得&監視処理を実行
-    this.monitorChangeAccountByLoginAfter();
   }
 
   /**
@@ -61,8 +63,7 @@ export class Web3Service {
    * ログイン後のアカウント変更監視
    */
   monitorChangeAccountByLoginAfter() {
-    const secondsCounter = interval(3000);
-    secondsCounter.subscribe(async n => {
+    interval(3000).subscribe(async n => {
       const web3 = new Web3(window['ethereum']);
       const accounts = await web3.eth.getAccounts();
 
@@ -78,9 +79,7 @@ export class Web3Service {
           this.web3Subject.next(undefined);
           this.accountSubject.next(undefined);
         }
-
       }
     })
   }
-
 }

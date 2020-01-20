@@ -4,4 +4,10 @@
         <P>Current Account: {{currentAccount}}</P>
         <button (click)="unlock()">WalletUnlock</button>
     </div>
+    <hr />
+    <button (click)="get()">Get</button>
+    <P>{{storageValue}}</P>
+    <hr />
+    <input (keyup)="setNumber($event)">
+    <button (click)="set()">Set</button>
 </div>
