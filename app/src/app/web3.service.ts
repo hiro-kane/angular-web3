@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import Web3 from 'web3';
+import { startWith } from 'rxjs/operators';
 import { Observable, Subject, interval } from 'rxjs';
 
 @Injectable({
@@ -63,7 +64,7 @@ export class Web3Service {
    * ログイン後のアカウント変更監視
    */
   monitorChangeAccountByLoginAfter() {
-    interval(3000).subscribe(async n => {
+    interval(3000).pipe(startWith(0)).subscribe(async n => {
       const web3 = new Web3(window['ethereum']);
       const accounts = await web3.eth.getAccounts();
 
