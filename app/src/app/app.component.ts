@@ -42,16 +42,27 @@ export class AppComponent {
   }
 
   async set() {
-    const contract = await new this.web3.eth.Contract(
+    const contract = new this.web3.eth.Contract(
       simpleStorage,
       "0x1E3222F5F44b5169E9Df0d7C283482fd734467E5"
     );
-    const number = await contract.methods.set(this.setStorageValue).send({ from: this.currentAccount });
-    console.log(number);
+
+    contract.methods.set(this.setStorageValue).send({ from: this.currentAccount })
+      .on('transactionHash', function (hash) {
+        // トランザクション発行成功
+      })
+      .on('confirmation', function (confirmationNumber, receipt) {
+        // トランザクション確定
+
+      })
+      .on('error', function (error, receipt) {
+        // トランザクションエラー
+
+      });
   }
 
   async get() {
-    const contract = await new this.web3.eth.Contract(
+    const contract = new this.web3.eth.Contract(
       simpleStorage,
       "0x1E3222F5F44b5169E9Df0d7C283482fd734467E5"
     );
