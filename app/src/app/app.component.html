@@ -1,13 +1,11 @@
 <div id="app">
-    <div id="login-area">
-        <P>Wallet Unlock : {{isUnlockWallet}}</P>
-        <P>Current Account: {{currentAccount}}</P>
-        <button (click)="unlock()">WalletUnlock</button>
-    </div>
+    <P>Wallet Unlock : {{isUnlockWallet}}</P>
+    <P>Current Account: {{currentAccount}}</P>
+    <button *ngIf="!isUnlockWallet" (click)="unlock()">WalletUnlock</button>
+
     <hr />
-    <button (click)="get()">Get</button>
-    <P>{{storageValue}}</P>
-    <hr />
+    <P>SimpleStorage Value: {{storageValue}}</P>
+
     <input (keyup)="setNumber($event)">
     <button (click)="set()">Set</button>
 </div>

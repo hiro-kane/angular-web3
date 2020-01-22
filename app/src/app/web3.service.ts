@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import Web3 from 'web3';
+import { BehaviorSubject, interval } from 'rxjs';
 import { startWith } from 'rxjs/operators';
-import { Observable, Subject, interval } from 'rxjs';
+import Web3 from 'web3';
+
+import { SimpleStorage } from './contract/simpleStorage';
 
 @Injectable({
   providedIn: 'root'
@@ -9,11 +11,7 @@ import { Observable, Subject, interval } from 'rxjs';
 export class Web3Service {
 
   loginAccount: string = "";
-
-  web3Subject: Subject<Web3> = new Subject();
-  web3 = this.web3Subject.asObservable();
-  accountSubject: Subject<string> = new Subject();
-  account = this.accountSubject.asObservable();
+  web3Subject: BehaviorSubject<Web3> = new BehaviorSubject<Web3>(undefined);
 
   constructor() {
     window.addEventListener('load', async () => {
@@ -29,7 +27,6 @@ export class Web3Service {
 
       // 取得できている場合はアカウント情報取得&監視処理を実行
       this.monitorChangeAccountByLoginAfter();
-
     });
   }
 
@@ -37,20 +34,15 @@ export class Web3Service {
    * WalletUnlock
    */
   async　unlockWallet() {
-    if (this.isUnlockWallet)
-      return;
+    if (this.isUnlockWallet()) return;
 
-    console.log("unlock");
     try {
       // ログイン
       await window['ethereum'].enable();
       // 取得できている場合はアカウント情報取得&監視処理を実行
       this.monitorChangeAccountByLoginAfter();
 
-    } catch (error) {
-
-      return;
-    }
+    } catch (error) { }
   }
 
   /**
@@ -61,10 +53,28 @@ export class Web3Service {
   }
 
   /**
+   * ログイン済アカウント取得
+   */
+  getLoginAccount(): string {
+    if (!this.isUnlockWallet()) return;
+
+    return this.loginAccount;
+  }
+
+  /**
+   * SimpleStorageコントラクトのインスタンス取得
+   */
+  getSimpleStorage(): SimpleStorage {
+    if (!this.isUnlockWallet()) return;
+    return new SimpleStorage(this.web3Subject.getValue())
+  }
+
+  /**
    * ログイン後のアカウント変更監視
    */
   monitorChangeAccountByLoginAfter() {
-    interval(3000).pipe(startWith(0)).subscribe(async n => {
+
+    const moniter = interval(3000).pipe(startWith(0)).subscribe(async n => {
       const web3 = new Web3(window['ethereum']);
       const accounts = await web3.eth.getAccounts();
 
@@ -72,13 +82,14 @@ export class Web3Service {
       if (this.loginAccount !== accounts[0]) {
         // undefinedかどうかでアカウント切り変え or ログアウトを判定
         if (accounts[0] !== undefined) {
+          // アカウント切り替え
           this.loginAccount = accounts[0];
           this.web3Subject.next(web3);
-          this.accountSubject.next(accounts[0]);
         } else {
+          // ログアウト
           this.loginAccount = "";
-          this.web3Subject.next(undefined);
-          this.accountSubject.next(undefined);
+          this.web3Subject.next(web3);
+          moniter.unsubscribe();
         }
       }
     })

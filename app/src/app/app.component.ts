@@ -1,9 +1,6 @@
 import { Component } from '@angular/core';
 import { Web3Service } from './web3.service';
-
-// import { simpleStorageAbi } from './define/simpleStorage.abi';
-let simpleStorage = require('./define/simpleStorage.abi.json');
-import Web3 from 'web3';
+import { SimpleStorage } from './contract/simpleStorage';
 
 @Component({
   selector: 'app-root',
@@ -13,64 +10,58 @@ import Web3 from 'web3';
 export class AppComponent {
   isUnlockWallet: boolean = false;
   currentAccount: string = 'no account';
-  web3: Web3;
   storageValue: string = "0";
   setStorageValue: number = 0;
+  simpleStorage: SimpleStorage;
 
   constructor(private web3Service: Web3Service) { }
 
   ngOnInit() {
-    this.web3Service.web3.subscribe(web3 => {
-      this.web3 = web3;
-      this.isUnlockWallet = this.web3Service.isUnlockWallet()
-    })
-
-    this.web3Service.account.subscribe(account => {
-      this.currentAccount = account;
+    this.web3Service.web3Subject.subscribe(web3 => {
+      if (web3 !== undefined) {
+        this.isUnlockWallet = this.web3Service.isUnlockWallet();
+        this.currentAccount = this.web3Service.getLoginAccount();
+        this.simpleStorage = this.web3Service.getSimpleStorage();
+        this.get()
+      }
     })
   }
 
+  /**
+   * ウォレット解除
+   */
   async unlock() {
     await this.web3Service.unlockWallet();
-
   }
 
+  /**
+   * 数値設定
+   * @param event 
+   */
   setNumber(event: any) {
     // 数値に変換
     const value: number = Number(event.target.value)
     this.setStorageValue = (isNaN(value)) ? 0 : value;
   }
 
+  /**
+   * スマートコントラクトにsetトランザクション発行
+   */
   async set() {
-    const contract = new this.web3.eth.Contract(
-      simpleStorage,
-      "0x1E3222F5F44b5169E9Df0d7C283482fd734467E5"
-    );
-
-    contract.methods.set(this.setStorageValue).send({ from: this.currentAccount })
-      .on('transactionHash', function (hash) {
-        // トランザクション発行成功
-      })
-      .on('confirmation', function (confirmationNumber, receipt) {
-        // トランザクション確定
-
-      })
-      .on('error', function (error, receipt) {
-        // トランザクションエラー
-
-      });
+    if (!this.isUnlockWallet) return;
+    if (await this.simpleStorage.set(this.setStorageValue, this.currentAccount))
+      this.get();
   }
 
-  async get() {
-    const contract = new this.web3.eth.Contract(
-      simpleStorage,
-      "0x1E3222F5F44b5169E9Df0d7C283482fd734467E5"
-    );
-
-    const number = await contract.methods.get().call();
-    console.log(number);
-    this.storageValue = number;
+  /**
+   * スマートコントラクトに設定されている値を取得
+   */
+  private async get() {
+    if (!this.isUnlockWallet) {
+      this.storageValue = "";
+      return;
+    }
+    this.storageValue = await this.simpleStorage.get();
   }
-
 
 }
