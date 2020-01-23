@@ -1,11 +1,31 @@
 <div id="app">
-    <P>Wallet Unlock : {{isUnlockWallet}}</P>
-    <P>Current Account: {{currentAccount}}</P>
-    <button *ngIf="!isUnlockWallet" (click)="unlock()">WalletUnlock</button>
+    <mat-toolbar color="primary">Angular Metamask Test</mat-toolbar>
+    <mat-card class="card">
+        <mat-card-title>Wallet</mat-card-title>
+        <mat-card-content>
+            <div *ngIf="isUnlockWallet; else lock">
+                <p>Wallet: Unlocked</p>
+            </div>
+            <ng-template #lock>
+                <p>Wallet: Lock</p>
+            </ng-template>
 
-    <hr />
-    <P>SimpleStorage Value: {{storageValue}}</P>
+            <P>Current Account: {{currentAccount}}</P>
+            <button mat-raised-button color="primary" [disabled]="isUnlockWallet"
+                (click)="unlock()">WalletUnlock</button>
+        </mat-card-content>
+    </mat-card>
 
-    <input (keyup)="setNumber($event)">
-    <button (click)="set()">Set</button>
+    <mat-card class="card">
+        <mat-card-title>Simple Storage</mat-card-title>
+        <mat-card-content>
+            <P>SimpleStorage Number: {{storageValue}}</P>
+
+            <mat-form-field>
+                <input matInput placeholder="SimpleStorage Number" (keyup)="setNumber($event)">
+            </mat-form-field>
+            <button class="set-button" mat-raised-button color="primary" [disabled]="!isUnlockWallet"
+                (click)="setSimpleStorageValue()">Set</button>
+        </mat-card-content>
+    </mat-card>
 </div>
