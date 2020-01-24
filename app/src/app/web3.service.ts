@@ -15,6 +15,9 @@ export class Web3Service {
 
   constructor() {
     window.addEventListener('load', async () => {
+      // metamaskアプリを登録していない場合は処理しない
+      if (!this.existsWeb3App()) return;
+
       // windowのethereumを取得
       const web3 = new Web3(window['ethereum']);
 
@@ -34,8 +37,11 @@ export class Web3Service {
    * WalletUnlock
    */
   async　unlockWallet() {
+    // アンロック済の場合は処理しない
     if (this.isUnlockWallet()) return;
 
+    // metamaskアプリを登録していない場合は処理しない
+    if (!this.existsWeb3App()) return;
     try {
       // ログイン
       await window['ethereum'].enable();
@@ -50,6 +56,13 @@ export class Web3Service {
    */
   isUnlockWallet(): boolean {
     return (this.loginAccount !== "");
+  }
+
+  /**
+   * Web3連携アプリが登録されているか確認
+   */
+  existsWeb3App(): boolean {
+    return (window['ethereum'] !== undefined);
   }
 
   /**
@@ -73,7 +86,6 @@ export class Web3Service {
    * ログイン後のアカウント変更監視
    */
   monitorChangeAccountByLoginAfter() {
-
     const moniter = interval(3000).pipe(startWith(0)).subscribe(async n => {
       const web3 = new Web3(window['ethereum']);
       const accounts = await web3.eth.getAccounts();
