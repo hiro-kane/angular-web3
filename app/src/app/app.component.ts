@@ -13,7 +13,7 @@ export class AppComponent {
   readonly NOT_REF_SIMPLE_STORAGE = 'Unknown';
 
   isUnlockWallet: boolean = false;
-  currentAccount: string = this.NO_ACCOUNT_TEXT;
+  loginAccount: string = this.NO_ACCOUNT_TEXT;
   storageValue: string = this.NOT_REF_SIMPLE_STORAGE;
   setStorageNumber: number = 0;
   simpleStorage: SimpleStorage;
@@ -24,7 +24,7 @@ export class AppComponent {
     this.web3Service.web3Subject.subscribe(web3 => {
       if (web3 !== undefined) {
         this.isUnlockWallet = this.web3Service.isUnlockWallet();
-        this.currentAccount = (this.web3Service.getLoginAccount()) ? this.web3Service.getLoginAccount() : this.NO_ACCOUNT_TEXT;
+        this.loginAccount = (this.web3Service.getLoginAccount()) ? this.web3Service.getLoginAccount() : this.NO_ACCOUNT_TEXT;
         this.simpleStorage = this.web3Service.getSimpleStorage();
         this.getSimpleStorageValue();
       }
@@ -53,7 +53,7 @@ export class AppComponent {
    */
   async setSimpleStorageValue() {
     if (!this.isUnlockWallet) return;
-    const res = await this.simpleStorage.set(this.setStorageNumber, this.currentAccount)
+    const res = await this.simpleStorage.set(this.setStorageNumber, this.loginAccount)
     if (res)
       this.getSimpleStorageValue();
   }
